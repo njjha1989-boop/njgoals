@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MyTracker">
+<meta name="theme-color" content="#2d6a4f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Neha's Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+
+:root {
+  --bg: #f7f4ef;
+  --card: #ffffff;
+  --accent: #2d6a4f;
+  --accent-light: #e8f4ee;
+  --accent-mid: #52b788;
+  --warn: #e07a5f;
+  --warn-light: #fdf0ec;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --gold: #b5893a;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: calc(80px + var(--safe-bottom));
+  overflow-x: hidden;
+}
+
+/* TOP BAR */
+.topbar {
+  background: var(--accent);
+  padding: calc(var(--safe-top) + 14px) 16px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: white;
+}
+
+.app-subtitle {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  margin-top: 1px;
+}
+
+.notify-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 8px 0 calc(8px + var(--safe-bottom));
+  display: flex;
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: all 0.2s;
+}
+
+.nav-item .nav-icon { font-size: 22px; }
+.nav-item .nav-label { font-size: 10px; color: var(--muted); font-weight: 500; }
+.nav-item.active .nav-label { color: var(--accent); font-weight: 700; }
+
+/* PAGES */
+.page { display: none; padding: 16px; }
+.page.active { display: block; }
+
+/* DATE BAR */
+.date-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.date-info .date-label { font-size: 11px; color: var(--muted); }
+.date-info .date-val { font-size: 15px; font-weight: 600; }
+
+.date-btns { display: flex; gap: 6px; }
+.date-btn {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: var(--accent-light);
+  border: none;
+  color: var(--accent);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* CARDS */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.card-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+/* WEIGHT CARD */
+.weight-display {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.weight-big {
+  font-family: 'DM Serif Display', serif;
+  font-size: 52px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.weight-unit { font-size: 18px; color: var(--muted); }
+
+.weight-right { flex: 1; }
+
+.progress-track {
+  background: var(--border);
+  border-radius: 99px;
+  height: 8px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-mid), var(--accent));
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.progress-text { font-size: 12px; color: var(--muted); }
+.progress-text strong { color: var(--accent); }
+
+.weight-input-hidden {
+  font-family: 'DM Serif Display', serif;
+  font-size: 52px;
+  color: var(--accent);
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 130px;
+  line-height: 1;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* CALORIE RING */
+.cal-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.cal-box {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+}
+
+.cal-num {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.cal-num.warn { color: var(--warn); }
+.cal-num.gold { color: var(--gold); }
+.cal-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* MEAL ROWS */
+.meal-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.meal-row:last-child { border-bottom: none; }
+.meal-emoji { font-size: 22px; width: 32px; text-align: center; }
+
+.meal-details { flex: 1; min-width: 0; }
+.meal-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+
+.meal-food-input {
+  font-size: 12px;
+  color: var(--muted);
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.meal-cal-input {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 55px;
+  text-align: right;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* WATER */
+.water-glasses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.glass {
+  font-size: 26px;
+  cursor: pointer;
+  opacity: 0.2;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.glass.full { opacity: 1; }
+
+.water-info {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.water-info strong { color: #3b82f6; }
+
+/* HABITS */
+.habits-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.habit-tile {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 11px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.habit-tile.done {
+  background: var(--accent-light);
+  border-color: var(--accent-mid);
+}
+
+.habit-emoji { font-size: 18px; }
+.habit-text { font-size: 12px; font-weight: 500; flex: 1; line-height: 1.3; }
+
+.habit-check {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  color: transparent;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.habit-tile.done .habit-check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+/* EXERCISE TOGGLES */
+.ex-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ex-row:last-child { border-bottom: none; }
+
+.toggle {
+  width: 44px; height: 26px;
+  border-radius: 99px;
+  background: var(--border);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle.on { background: var(--accent); }
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: white;
+  top: 3px; left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.toggle.on::after { transform: translateX(18px); }
+
+.ex-info { flex: 1; }
+.ex-name { font-size: 13px; font-weight: 600; }
+.ex-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.ex-cal { font-size: 12px; font-weight: 700; color: var(--accent); }
+
+/* NOTES */
+.notes-area {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  resize: none;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+/* SAVE BTN */
+.save-btn {
+  width: 100%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 17px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: opacity 0.2s;
+  letter-spacing: 0.01em;
+}
+
+.save-btn:active { opacity: 0.85; transform: scale(0.99); }
+
+.save-confirm {
+  text-align: center;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 10px;
+  min-height: 20px;
+}
+
+/* STATS PAGE */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat-box {
+  background: white;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  text-align: center;
+}
+
+.stat-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  color: var(--accent);
+}
+
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* QUIT CARD */
+.quit-card {
+  background: linear-gradient(135deg, #fffbeb, #fef9c3);
+  border: 1.5px solid #fcd34d;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.quit-days {
+  font-family: 'DM Serif Display', serif;
+  font-size: 52px;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.quit-info { flex: 1; }
+.quit-label { font-size: 14px; color: var(--muted); }
+.quit-date-label { font-size: 11px; color: var(--gold); font-weight: 700; margin-top: 6px; }
+.quit-emoji { font-size: 36px; }
+
+/* WEEK STRIP */
+.week-strip {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.week-day {
+  flex: 1;
+  border-radius: 10px;
+  padding: 8px 4px;
+  text-align: center;
+  background: var(--border);
+}
+
+.week-day .wd-label { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+.week-day .wd-score { font-size: 16px; margin-top: 4px; }
+.week-day.great { background: var(--accent); }
+.week-day.great .wd-label { color: rgba(255,255,255,0.8); }
+.week-day.good { background: var(--accent-mid); }
+.week-day.good .wd-label { color: rgba(255,255,255,0.8); }
+.week-day.okay { background: var(--gold); }
+.week-day.okay .wd-label { color: rgba(255,255,255,0.8); }
+.week-day.off { background: var(--warn); }
+.week-day.off .wd-label { color: rgba(255,255,255,0.8); }
+.week-day.today { box-shadow: 0 0 0 2px var(--accent); }
+
+/* WEIGHT HISTORY */
+.wh-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wh-item {
+  flex-shrink: 0;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 8px 12px;
+  text-align: center;
+  min-width: 60px;
+}
+
+.wh-date { font-size: 10px; color: var(--muted); }
+.wh-val { font-size: 16px; font-weight: 700; color: var(--accent); margin-top: 2px; }
+.wh-delta { font-size: 10px; margin-top: 2px; }
+.wh-delta.down { color: var(--accent); }
+.wh-delta.up { color: var(--warn); }
+
+/* REMINDERS PAGE */
+.reminder-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reminder-emoji { font-size: 28px; }
+.reminder-info { flex: 1; }
+.reminder-time { font-size: 20px; font-weight: 700; color: var(--accent); }
+.reminder-msg { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.reminder-toggle {
+  width: 44px; height: 26px;
+  border-radius: 99px;
+  background: var(--border);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.reminder-toggle.on { background: var(--accent); }
+.reminder-toggle::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: white;
+  top: 3px; left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.reminder-toggle.on::after { transform: translateX(18px); }
+
+.permission-banner {
+  background: var(--accent-light);
+  border: 1.5px solid var(--accent-mid);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.permission-banner p { font-size: 13px; color: var(--accent); margin-bottom: 10px; }
+
+.allow-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.section-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+/* INSTALL BANNER */
+.install-banner {
+  background: linear-gradient(135deg, var(--accent), #1a4731);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  color: white;
+  display: none;
+}
+
+.install-banner.show { display: block; }
+.install-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.install-sub { font-size: 12px; opacity: 0.8; margin-bottom: 12px; }
+.install-btn {
+  background: white;
+  color: var(--accent);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* iOS install instructions */
+.ios-instructions {
+  background: var(--accent-light);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: var(--accent);
+  display: none;
+}
+
+.ios-instructions.show { display: block; }
+.ios-instructions p { margin-bottom: 6px; }
+.ios-instructions strong { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="app-title">Neha's Tracker 🌿</div>
+      <div class="app-subtitle">81kg → 65kg · Quit date: Jul 29</div>
+    </div>
+    <button class="notify-btn" onclick="showPage('reminders')">🔔 Reminders</button>
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div style="padding: 12px 16px 0">
+  <div class="install-banner" id="installBanner">
+    <div class="install-title">📲 Add to Home Screen</div>
+    <div class="install-sub">Install this app for quick access every day</div>
+    <button class="install-btn" id="installBtn">Install App</button>
+  </div>
+  <div class="ios-instructions" id="iosInstructions">
+    <p>📲 <strong>Add to Home Screen:</strong></p>
+    <p>1. Tap the <strong>Share</strong> button (□↑) at the bottom of Safari</p>
+    <p>2. Scroll down and tap <strong>"Add to Home Screen"</strong></p>
+    <p>3. Tap <strong>Add</strong> — done! 🎉</p>
+  </div>
+</div>
+
+<!-- PAGE: TODAY -->
+<div class="page active" id="page-today">
+  <div class="date-bar">
+    <div class="date-info">
+      <div class="date-label">Tracking</div>
+      <div class="date-val" id="dateDisplay"></div>
+    </div>
+    <div class="date-btns">
+      <button class="date-btn" onclick="changeDate(-1)">‹</button>
+      <button class="date-btn" onclick="changeDate(1)">›</button>
+    </div>
+  </div>
+
+  <!-- WEIGHT -->
+  <div class="card">
+    <div class="card-header">Today's Weight</div>
+    <div class="weight-display">
+      <div>
+        <input class="weight-input-hidden" type="number" id="weightInput" placeholder="81.0" step="0.1" min="40" max="150">
+        <span class="weight-unit">kg</span>
+      </div>
+      <div class="weight-right">
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-text" id="progressText">Tap to enter weight</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALORIES -->
+  <div class="card">
+    <div class="card-header">Calories</div>
+    <div class="cal-row">
+      <div class="cal-box">
+        <div class="cal-num" id="calIn">0</div>
+        <div class="cal-label">Eaten</div>
+      </div>
+      <div class="cal-box">
+        <div class="cal-num gold" id="calBurn">1533</div>
+        <div class="cal-label">Burned</div>
+      </div>
+      <div class="cal-box">
+        <div class="cal-num" id="calDeficit">0</div>
+        <div class="cal-label">Deficit</div>
+      </div>
+    </div>
+
+    <div class="meal-row">
+      <div class="meal-emoji">🌅</div>
+      <div class="meal-details">
+        <div class="meal-name">Breakfast</div>
+        <input class="meal-food-input" id="bfFood" type="text" placeholder="e.g. 2 eggs + 1 idli">
+      </div>
+      <input class="meal-cal-input" id="bfCal" type="number" placeholder="220" oninput="recalc()">
+    </div>
+
+    <div class="meal-row">
+      <div class="meal-emoji">☕</div>
+      <div class="meal-details">
+        <div class="meal-name">Mid Morning</div>
+        <input class="meal-food-input" id="mmFood" type="text" placeholder="e.g. coffee + almonds">
+      </div>
+      <input class="meal-cal-input" id="mmCal" type="number" placeholder="80" oninput="recalc()">
+    </div>
+
+    <div class="meal-row">
+      <div class="meal-emoji">🥗</div>
+      <div class="meal-details">
+        <div class="meal-name">Lunch</div>
+        <input class="meal-food-input" id="lunchFood" type="text" placeholder="e.g. Six Hands salmon">
+      </div>
+      <input class="meal-cal-input" id="lunchCal" type="number" placeholder="450" oninput="recalc()">
+    </div>
+
+    <div class="meal-row">
+      <div class="meal-emoji">🍎</div>
+      <div class="meal-details">
+        <div class="meal-name">Snack</div>
+        <input class="meal-food-input" id="snackFood" type="text" placeholder="e.g. apple or green tea">
+      </div>
+      <input class="meal-cal-input" id="snackCal" type="number" placeholder="60" oninput="recalc()">
+    </div>
+
+    <div class="meal-row">
+      <div class="meal-emoji">🌙</div>
+      <div class="meal-details">
+        <div class="meal-name">Dinner</div>
+        <input class="meal-food-input" id="dinnerFood" type="text" placeholder="e.g. 1 chapati + dal + sabzi">
+      </div>
+      <input class="meal-cal-input" id="dinnerCal" type="number" placeholder="400" oninput="recalc()">
+    </div>
+
+    <div class="meal-row">
+      <div class="meal-emoji">🍫</div>
+      <div class="meal-details">
+        <div class="meal-name">Evening Fix</div>
+        <input class="meal-food-input" id="evFood" type="text" placeholder="e.g. 2 dates / haldi milk">
+      </div>
+      <input class="meal-cal-input" id="evCal" type="number" placeholder="80" oninput="recalc()">
+    </div>
+  </div>
+
+  <!-- WATER -->
+  <div class="card">
+    <div class="card-header">Water — Target 2.5L</div>
+    <div class="water-glasses" id="waterGlasses"></div>
+    <div class="water-info">Tap each 💧 to fill · 1 glass = 250ml · <strong id="waterAmt">0.00L</strong> / 2.5L</div>
+  </div>
+
+  <!-- EXERCISE -->
+  <div class="card">
+    <div class="card-header">Movement Today</div>
+
+    <div class="ex-row">
+      <div class="toggle" id="tog-workout" onclick="toggleEx('workout',150)"></div>
+      <div class="ex-info">
+        <div class="ex-name">🏋️ Morning Workout</div>
+        <div class="ex-sub">45 min home — mat + bodyweight</div>
+      </div>
+      <div class="ex-cal">+150</div>
+    </div>
+
+    <div class="ex-row">
+      <div class="toggle" id="tog-walk" onclick="toggleEx('walk',375)"></div>
+      <div class="ex-info">
+        <div class="ex-name">🚶 Daily Walk</div>
+        <div class="ex-sub">Park with Advika + commute steps</div>
+      </div>
+      <div class="ex-cal">+375</div>
+    </div>
+
+    <div class="ex-row">
+      <div class="toggle" id="tog-lunch-walk" onclick="toggleEx('lunch-walk',80)"></div>
+      <div class="ex-info">
+        <div class="ex-name">🌿 Post Lunch Walk</div>
+        <div class="ex-sub">10 min around Suntec / Millenia</div>
+      </div>
+      <div class="ex-cal">+80</div>
+    </div>
+
+    <div class="ex-row">
+      <div class="toggle" id="tog-spin" onclick="toggleEx('spin',400)"></div>
+      <div class="ex-info">
+        <div class="ex-name">🚴 Spin Class</div>
+        <div class="ex-sub">Weekend gym — 45 min</div>
+      </div>
+      <div class="ex-cal">+400</div>
+    </div>
+
+    <div class="ex-row">
+      <div class="toggle" id="tog-weights" onclick="toggleEx('weights',250)"></div>
+      <div class="ex-info">
+        <div class="ex-name">💪 Weights</div>
+        <div class="ex-sub">Weekend gym — full body</div>
+      </div>
+      <div class="ex-cal">+250</div>
+    </div>
+  </div>
+
+  <!-- HABITS -->
+  <div class="card">
+    <div class="card-header">Daily Habits</div>
+    <div class="habits-grid">
+      <div class="habit-tile" id="h-lemon" onclick="toggleH('lemon')">
+        <span class="habit-emoji">🍋</span>
+        <span class="habit-text">Lemon water on wake</span>
+        <span class="habit-check">✓</span>
+      </div>
+      <div class="habit-tile" id="h-jeera" onclick="toggleH('jeera')">
+        <span class="habit-emoji">🌿</span>
+        <span class="habit-text">Jeera water</span>
+        <span class="habit-check">✓</span>
+      </div>
+      <div class="habit-tile" id="h-greentea" onclick="toggleH('greentea')">
+        <span class="habit-emoji">🍵</span>
+        <span class="habit-text">Green tea (no sugar)</span>
+        <span class="habit-check">✓</span>
+      </div>
+      <div class="habit-tile" id="h-protein" onclick="toggleH('protein')">
+        <span class="habit-emoji">💪</span>
+        <span class="habit-text">Protein first at meals</span>
+        <span class="habit-check">✓</span>
+      </div>
+      <div class="habit-tile" id="h-dinner" onclick="toggleH('dinner')">
+        <span class="habit-emoji">🕐</span>
+        <span class="habit-text">Dinner by 8:30pm</span>
+        <span class="habit-check">✓</span>
+      </div>
+      <div class="habit-tile" id="h-nosnack" onclick="toggleH('nosnack')">
+        <span class="habit-emoji">🚫</span>
+        <span class="habit-text">Nothing after 8:30pm</span>
+        <span class="habit-check">✓</span>
+      </div>
+      <div class="habit-tile" id="h-supps" onclick="toggleH('supps')">
+        <span class="habit-emoji">💊</span>
+        <span class="habit-text">Supplements taken</span>
+        <span class="habit-check">✓</span>
+      </div>
+      <div class="habit-tile" id="h-nosmoke" onclick="toggleH('nosmoke')">
+        <span class="habit-emoji">🚭</span>
+        <span class="habit-text">No cigarette today</span>
+        <span class="habit-check">✓</span>
+      </div>
+      <div class="habit-tile" id="h-sleep" onclick="toggleH('sleep')">
+        <span class="habit-emoji">😴</span>
+        <span class="habit-text">Sleep by 11:30pm</span>
+        <span class="habit-check">✓</span>
+      </div>
+      <div class="habit-tile" id="h-sun" onclick="toggleH('sun')">
+        <span class="habit-emoji">☀️</span>
+        <span class="habit-text">Morning sunlight</span>
+        <span class="habit-check">✓</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="card">
+    <div class="card-header">How are you feeling?</div>
+    <textarea class="notes-area" id="notesInput" placeholder="Energy levels, cravings, mood, anything notable..."></textarea>
+  </div>
+
+  <button class="save-btn" onclick="saveDay()">Save Today ✓</button>
+  <div class="save-confirm" id="saveConfirm"></div>
+</div>
+
+<!-- PAGE: STATS -->
+<div class="page" id="page-stats">
+  <div style="padding-top:4px">
+    <div class="section-title">Progress</div>
+    <div class="section-sub">81kg → 65kg goal</div>
+
+    <!-- QUIT COUNTER -->
+    <div class="quit-card">
+      <div>
+        <div class="quit-days" id="quitDaysDisplay">—</div>
+        <div class="quit-label">smoke-free days</div>
+        <div class="quit-date-label">Quit date: 29 July 2026</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="quit-emoji">🚭</div>
+    </div>
+
+    <!-- WEEK -->
+    <div class="card">
+      <div class="card-header">This Week</div>
+      <div class="week-strip" id="weekStrip"></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-num" id="statLost">—</div>
+        <div class="stat-label">kg lost total</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statToGo">—</div>
+        <div class="stat-label">kg to goal</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statStreak">—</div>
+        <div class="stat-label">day streak</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statAvgScore">—</div>
+        <div class="stat-label">avg daily score</div>
+      </div>
+    </div>
+
+    <!-- MONTHLY REPORT -->
+    <div class="card" id="monthlyCard">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Monthly Report Card</span>
+        <div style="display:flex;gap:6px">
+          <button onclick="changeMonth(-1)" style="background:var(--accent-light);border:none;border-radius:8px;padding:4px 10px;color:var(--accent);font-size:14px;cursor:pointer">‹</button>
+          <button onclick="changeMonth(1)" style="background:var(--accent-light);border:none;border-radius:8px;padding:4px 10px;color:var(--accent);font-size:14px;cursor:pointer">›</button>
+        </div>
+      </div>
+      <div id="monthLabel" style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:14px"></div>
+
+      <!-- Month score boxes -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px" id="monthStats"></div>
+
+      <!-- Monthly breakdown rows -->
+      <div id="monthBreakdown"></div>
+
+      <!-- Month calendar dots -->
+      <div style="margin-top:14px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:8px">Daily dots</div>
+        <div id="monthCalendar" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap">
+          <span>🟢 Great (8-10)</span><span>🟡 Good (6-7)</span><span>🟠 Okay (4-5)</span><span>🔴 Off (1-3)</span><span>⚫ No log</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEIGHT HISTORY -->
+    <div class="card" id="whCard">
+      <div class="card-header">Weight History</div>
+      <div class="wh-scroll" id="whScroll"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: REMINDERS -->
+<div class="page" id="page-reminders">
+  <div style="padding-top:4px">
+    <div class="section-title">Daily Reminders</div>
+    <div class="section-sub">3 check-ins per day to keep you on track</div>
+
+    <div class="permission-banner" id="permBanner" style="display:none">
+      <p>Enable notifications to receive your daily reminders</p>
+      <button class="allow-btn" onclick="requestNotificationPermission()">🔔 Allow Notifications</button>
+    </div>
+
+    <div id="notifStatus" style="font-size:13px; color:var(--accent); font-weight:600; margin-bottom:14px; display:none"></div>
+
+    <div class="reminder-card">
+      <div class="reminder-emoji">🌅</div>
+      <div class="reminder-info">
+        <div class="reminder-time">8:00 AM</div>
+        <div class="reminder-msg">Morning check-in · Log breakfast · Confirm workout done</div>
+      </div>
+      <div class="reminder-toggle on" id="rem-morning" onclick="toggleReminder('morning')"></div>
+    </div>
+
+    <div class="reminder-card">
+      <div class="reminder-emoji">☀️</div>
+      <div class="reminder-info">
+        <div class="reminder-time">1:00 PM</div>
+        <div class="reminder-msg">Lunch logged? · Water check · Post-lunch walk reminder</div>
+      </div>
+      <div class="reminder-toggle on" id="rem-afternoon" onclick="toggleReminder('afternoon')"></div>
+    </div>
+
+    <div class="reminder-card">
+      <div class="reminder-emoji">🌙</div>
+      <div class="reminder-info">
+        <div class="reminder-time">9:00 PM</div>
+        <div class="reminder-msg">Log dinner · Check habits · Nothing after 8:30pm!</div>
+      </div>
+      <div class="reminder-toggle on" id="rem-evening" onclick="toggleReminder('evening')"></div>
+    </div>
+
+    <div class="ios-instructions show" style="margin-top:8px">
+      <p>💡 <strong>Note:</strong> For reminders to work reliably on iPhone, add this app to your Home Screen first, then enable notifications.</p>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-header">Test Reminders</div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:12px">Send yourself a test notification now to confirm they're working.</p>
+      <button class="save-btn" onclick="sendTestNotification()">Send Test Notification</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-today" onclick="showPage('today')">
+    <span class="nav-icon">📋</span>
+    <span class="nav-label">Today</span>
+  </div>
+  <div class="nav-item" id="nav-stats" onclick="showPage('stats')">
+    <span class="nav-icon">📈</span>
+    <span class="nav-label">Progress</span>
+  </div>
+  <div class="nav-item" id="nav-reminders" onclick="showPage('reminders')">
+    <span class="nav-icon">🔔</span>
+    <span class="nav-label">Reminders</span>
+  </div>
+</div>
+
+<script>
+const STORE = 'neha_pwa_v1';
+const START_W = 81, TARGET_W = 65;
+const QUIT_DATE = new Date('2026-07-29T00:00:00');
+const HABITS = ['lemon','jeera','greentea','protein','dinner','nosnack','supps','nosmoke','sleep','sun'];
+const EX_MAP = { workout:150, walk:375, 'lunch-walk':80, spin:400, weights:250 };
+const REMINDERS = {
+  morning: { hour:8, min:0, title:'🌅 Morning Check-in', body:'Log breakfast & confirm workout done! 💪' },
+  afternoon: { hour:13, min:0, title:'☀️ Lunch Check-in', body:'Log lunch, drink water, do your post-lunch walk! 🚶' },
+  evening: { hour:21, min:0, title:'🌙 Evening Check-in', body:'Log dinner & tick off your habits. Nothing after 8:30pm! ✓' }
+};
+
+let data = {}, currentDate = new Date(), exState = {}, reminderState = { morning:true, afternoon:true, evening:true };
+let waterFilled = 0, deferredPrompt = null;
+
+currentDate.setHours(0,0,0,0);
+
+function dateKey(d) { return d.toISOString().split('T')[0]; }
+function fmtDate(d) { return d.toLocaleDateString('en-SG',{weekday:'short',day:'numeric',month:'short'}); }
+function fmtDateLong(d) { return d.toLocaleDateString('en-SG',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
+
+let viewMonth = new Date(); // tracks which month we're viewing in stats
+
+function changeMonth(dir) {
+  viewMonth.setMonth(viewMonth.getMonth() + dir);
+  renderMonthlyReport();
+}
+
+function renderMonthlyReport() {
+  const year = viewMonth.getFullYear();
+  const month = viewMonth.getMonth();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const monthName = viewMonth.toLocaleDateString('en-SG',{month:'long',year:'numeric'});
+
+  document.getElementById('monthLabel').textContent = monthName;
+
+  // Gather all days in this month
+  let logged = 0, deficitDays = 0, waterDays = 0, noSmokeDays = 0,
+      workoutDays = 0, greatDays = 0, totalScore = 0, scoredDays = 0;
+
+  const calDots = document.getElementById('monthCalendar');
+  calDots.innerHTML = '';
+
+  for(let d=1; d<=daysInMonth; d++) {
+    const date = new Date(year, month, d);
+    date.setHours(0,0,0,0);
+    const key = dateKey(date);
+    const entry = data[key];
+    const isFuture = date > today;
+
+    // Calendar dot
+    const dot = document.createElement('div');
+    dot.style.cssText = `width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:default;`;
+
+    if(isFuture) {
+      dot.style.background = 'var(--border)';
+      dot.style.color = 'var(--muted)';
+      dot.textContent = d;
+    } else if(!entry || !entry.score) {
+      dot.style.background = '#374151';
+      dot.style.color = '#9ca3af';
+      dot.textContent = d;
+    } else {
+      const s = entry.score;
+      if(s >= 8) { dot.style.background='var(--accent)'; dot.style.color='white'; }
+      else if(s >= 6) { dot.style.background='var(--accent-mid)'; dot.style.color='white'; }
+      else if(s >= 4) { dot.style.background='var(--gold)'; dot.style.color='white'; }
+      else { dot.style.background='var(--warn)'; dot.style.color='white'; }
+      dot.textContent = d;
+      logged++;
+      totalScore += s;
+      scoredDays++;
+      if(s >= 8) greatDays++;
+
+      // Calorie deficit check
+      const meals = entry.meals || {};
+      const calIn = Object.values(meals).reduce((s,m) => s+(parseFloat(m.cal)||0), 0);
+      const exCals = (entry.exercise||[]).reduce((s,e) => s+(EX_MAP[e]||0), 0);
+      const burn = 1533 + exCals;
+      if(calIn > 0 && (burn - calIn) >= 300) deficitDays++;
+
+      if((entry.water||0) >= 8) waterDays++;
+      if((entry.habits||[]).includes('nosmoke')) noSmokeDays++;
+      if((entry.exercise||[]).some(e=>['workout','spin','weights'].includes(e))) workoutDays++;
+    }
+    calDots.appendChild(dot);
+  }
+
+  // Logged days only (past days)
+  const pastDays = Math.min(daysInMonth, Math.floor((today - new Date(year,month,1))/86400000)+1);
+
+  // Monthly stat boxes
+  const avgScore = scoredDays > 0 ? (totalScore/scoredDays).toFixed(1) : '—';
+  document.getElementById('monthStats').innerHTML = `
+    <div class="stat-box">
+      <div class="stat-num">${logged}<span style="font-size:14px;color:var(--muted)">/${pastDays}</span></div>
+      <div class="stat-label">days logged</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">${avgScore}</div>
+      <div class="stat-label">avg daily score</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">${greatDays}</div>
+      <div class="stat-label">great days 🌟</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">${logged > 0 ? Math.round((logged/pastDays)*100) : 0}%</div>
+      <div class="stat-label">consistency</div>
+    </div>
+  `;
+
+  // Breakdown rows
+  const rows = [
+    { label: '🔥 Calorie deficit hit (≥300)', done: deficitDays, total: logged },
+    { label: '💧 Water goal hit (2.5L)', done: waterDays, total: logged },
+    { label: '🏋️ Workout done', done: workoutDays, total: logged },
+    { label: '🚭 No cigarette', done: noSmokeDays, total: logged },
+  ];
+
+  document.getElementById('monthBreakdown').innerHTML = rows.map(r => {
+    const pct = r.total > 0 ? Math.round((r.done/r.total)*100) : 0;
+    const color = pct >= 80 ? 'var(--accent)' : pct >= 50 ? 'var(--gold)' : 'var(--warn)';
+    return `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:13px;font-weight:500">${r.label}</span>
+          <span style="font-size:13px;font-weight:700;color:${color}">${r.done}/${r.total} days</span>
+        </div>
+        <div style="background:var(--border);border-radius:99px;height:6px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${color};border-radius:99px;transition:width 0.4s"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function load() {
+  try { const r = localStorage.getItem(STORE); if(r) data = JSON.parse(r); } catch(e) {}
+  try { const r = localStorage.getItem(STORE+'_reminders'); if(r) reminderState = JSON.parse(r); } catch(e) {}
+}
+
+function save() { try { localStorage.setItem(STORE, JSON.stringify(data)); } catch(e) {} }
+function saveReminders() { try { localStorage.setItem(STORE+'_reminders', JSON.stringify(reminderState)); } catch(e) {} }
+
+// Navigation
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name === 'stats') { renderStats(); renderMonthlyReport(); }
+  if(name === 'reminders') renderReminders();
+}
+
+function changeDate(dir) {
+  currentDate.setDate(currentDate.getDate() + dir);
+  renderToday();
+}
+
+// Water
+function renderWater(filled) {
+  waterFilled = filled;
+  const wrap = document.getElementById('waterGlasses');
+  wrap.innerHTML = '';
+  for(let i=0;i<10;i++){
+    const s = document.createElement('span');
+    s.className = 'glass' + (i<filled?' full':'');
+    s.textContent = '💧';
+    s.onclick = () => { renderWater(i < filled ? i : i+1); };
+    wrap.appendChild(s);
+  }
+  document.getElementById('waterAmt').textContent = (filled*0.25).toFixed(2)+'L';
+}
+
+// Exercise
+function toggleEx(name, cal) {
+  const el = document.getElementById('tog-'+name);
+  if(exState[name]) { delete exState[name]; el.classList.remove('on'); }
+  else { exState[name]=cal; el.classList.add('on'); }
+  recalc();
+}
+
+// Habits
+function toggleH(name) {
+  document.getElementById('h-'+name).classList.toggle('done');
+}
+
+// Food calorie database — Neha's specific foods
+const FOOD_DB = {
+  // Indian staples
+  'idli': 80, 'idly': 80,
+  '1 idli': 80, '2 idli': 160, '2 idly': 160, '3 idli': 240,
+  'chapati': 120, 'chapathi': 120, 'roti': 120,
+  '1 chapati': 120, '2 chapati': 240, '1 roti': 120, '2 roti': 240,
+  'rice': 200, 'white rice': 200,
+  'dal': 120, 'daal': 120, 'lentils': 120,
+  'sabzi': 80, 'subzi': 80, 'vegetable': 80, 'vegetables': 80,
+  'curd': 60, 'yogurt': 60, 'dahi': 60,
+  'chana': 150, 'chickpea': 150, 'chickpeas': 150, 'black chana': 150,
+  'moong dal': 100, 'moong': 100,
+  'bitter gourd': 60, 'karela': 60,
+  'paneer': 180, 'tofu': 80,
+  'sambar': 80,
+  'idli sambar': 200,
+  'poha': 200,
+  'upma': 200,
+  'dosa': 150, '1 dosa': 150,
+  'paratha': 200, '1 paratha': 200,
+  'ghee': 45, 'butter': 35,
+  'moong dal chilla': 200, 'chilla': 200,
+
+  // Proteins
+  'egg': 70, 'eggs': 140, '1 egg': 70, '2 eggs': 140, '2 egg': 140,
+  'boiled egg': 70, 'boiled eggs': 140,
+  'chicken': 200, 'grilled chicken': 180,
+  'salmon': 200, 'grilled salmon': 180,
+  'fish': 150,
+
+  // Breakfast items
+  'oats': 150, 'oatmeal': 150,
+  'greek yogurt': 90,
+  'granola': 200,
+  'toast': 80, '1 toast': 80, '2 toast': 160,
+  'bread': 80,
+
+  // Lunch spots
+  'six hands': 420, 'six hands salmon': 430, 'six hands chicken': 400,
+  'six hands salad': 420, 'salmon salad': 430,
+  'chicken rice': 450, 'hainanese chicken rice': 450,
+  'yong tau foo': 350,
+  'ban mian': 400,
+  'economy rice': 450,
+  'bento': 450,
+
+  // Snacks
+  'almonds': 70, '10 almonds': 70, 'nuts': 80, 'mixed nuts': 80,
+  'apple': 80, '1 apple': 80,
+  'banana': 90, '1 banana': 90,
+  'dates': 60, '2 dates': 60, '1 date': 30,
+  'guava': 60,
+  'papaya': 50,
+  'berries': 50, 'blueberries': 50,
+  'pomegranate': 80,
+  'kiwi': 60, '1 kiwi': 60, '2 kiwi': 120,
+  'orange': 65,
+  'oat cookie': 90, 'cookie': 100, 'biscuit': 70,
+  'dark chocolate': 60, '1 square dark chocolate': 50,
+
+  // Drinks
+  'green tea': 0, 'black coffee': 5, 'coffee': 30,
+  'chai': 90, 'tea': 90, 'milk tea': 90,
+  'tea no sugar': 40, 'chai no sugar': 40,
+  'haldi milk': 80, 'turmeric milk': 80,
+  'lemon water': 5, 'jeera water': 5,
+  'sparkling water': 0, 'water': 0,
+  'coconut water': 60,
+  'juice': 120, 'fruit juice': 120,
+
+  // Common combos
+  '2 eggs 1 idli': 220, '2 eggs + 1 idli': 220,
+  'eggs and idli': 220, 'egg idli': 220,
+  'rice dal': 320, 'rice and dal': 320,
+  'dal rice': 320, 'rice dal sabzi': 400,
+  'chapati dal': 240, 'chapati sabzi': 200,
+  'chapati chana': 270, '1 chapati chana': 270,
+  'chapati dal sabzi curd': 360,
+  'coffee almonds': 80, 'coffee + almonds': 80, 'coffee nuts': 85,
+};
+
+function lookupCalories(text) {
+  if(!text) return null;
+  const t = text.toLowerCase().trim();
+  // Direct match
+  if(FOOD_DB[t]) return FOOD_DB[t];
+  // Partial match — sum up individual items
+  let total = 0;
+  let matched = false;
+  // Split by +, and, comma
+  const parts = t.split(/[+,&]|\band\b/).map(p => p.trim()).filter(Boolean);
+  for(const part of parts) {
+    // Try exact
+    if(FOOD_DB[part]) { total += FOOD_DB[part]; matched = true; continue; }
+    // Try contains
+    let found = false;
+    for(const key of Object.keys(FOOD_DB)) {
+      if(part.includes(key) || key.includes(part)) {
+        // Check for quantity prefix like "2 eggs"
+        const numMatch = part.match(/^(\d+)\s+(.+)/);
+        if(numMatch) {
+          const qty = parseInt(numMatch[1]);
+          const food = numMatch[2];
+          if(FOOD_DB[food]) { total += FOOD_DB[food] * qty; matched = true; found = true; break; }
+        }
+        total += FOOD_DB[key]; matched = true; found = true; break;
+      }
+    }
+  }
+  return matched ? total : null;
+}
+
+function autoFillCalories(foodInputId, calInputId) {
+  const foodEl = document.getElementById(foodInputId);
+  const calEl = document.getElementById(calInputId);
+  if(!foodEl || !calEl) return;
+  const cal = lookupCalories(foodEl.value);
+  if(cal !== null) {
+    calEl.value = cal;
+    calEl.style.color = 'var(--accent-mid)'; // green tint = auto-filled
+  } else {
+    calEl.style.color = 'var(--accent)';
+  }
+  recalc();
+}
+
+// Wire food inputs to auto-fill
+const MEAL_PAIRS = [
+  ['bfFood','bfCal'],['mmFood','mmCal'],['lunchFood','lunchCal'],
+  ['snackFood','snackCal'],['dinnerFood','dinnerCal'],['evFood','evCal']
+];
+
+// Calories
+function recalc() {
+  const fields = ['bfCal','mmCal','lunchCal','snackCal','dinnerCal','evCal'];
+  let totalIn = fields.reduce((s,f) => s + (parseFloat(document.getElementById(f).value)||0), 0);
+  let burn = 1533 + Object.values(exState).reduce((s,v)=>s+v,0);
+  const deficit = burn - totalIn;
+  document.getElementById('calIn').textContent = Math.round(totalIn);
+  document.getElementById('calBurn').textContent = Math.round(burn);
+  const defEl = document.getElementById('calDeficit');
+  defEl.textContent = Math.round(deficit);
+  defEl.className = 'cal-num' + (deficit >= 300 ? '' : ' warn');
+}
+
+// Weight progress
+function updateProgress(w) {
+  if(!w) { document.getElementById('progressText').textContent='Tap to enter weight'; return; }
+  const lost = START_W - w, total = START_W - TARGET_W;
+  const pct = Math.max(0, Math.min(100, (lost/total)*100));
+  document.getElementById('progressFill').style.width = pct+'%';
+  const rem = (w - TARGET_W).toFixed(1);
+  const lostD = lost > 0 ? lost.toFixed(1) : '0.0';
+  document.getElementById('progressText').innerHTML = `<strong>${lostD}kg lost</strong> · ${rem}kg to go`;
+}
+
+// Save day
+function saveDay() {
+  const key = dateKey(currentDate);
+  const doneH = HABITS.filter(h => document.getElementById('h-'+h)?.classList.contains('done'));
+  const doneEx = Object.keys(exState);
+  const calIn = parseFloat(document.getElementById('calIn').textContent)||0;
+  const score = Math.min(10, Math.round(
+    (doneH.length/10)*5 +
+    (calIn>0&&calIn<=1600?3:calIn<=1800?1:0) +
+    (waterFilled>=8?2:waterFilled>=5?1:0)
+  ));
+
+  data[key] = {
+    weight: parseFloat(document.getElementById('weightInput').value)||null,
+    meals: {
+      bf:{food:document.getElementById('bfFood').value,cal:document.getElementById('bfCal').value},
+      mm:{food:document.getElementById('mmFood').value,cal:document.getElementById('mmCal').value},
+      lunch:{food:document.getElementById('lunchFood').value,cal:document.getElementById('lunchCal').value},
+      snack:{food:document.getElementById('snackFood').value,cal:document.getElementById('snackCal').value},
+      dinner:{food:document.getElementById('dinnerFood').value,cal:document.getElementById('dinnerCal').value},
+      ev:{food:document.getElementById('evFood').value,cal:document.getElementById('evCal').value},
+    },
+    water: waterFilled,
+    habits: doneH,
+    exercise: doneEx,
+    notes: document.getElementById('notesInput').value,
+    score
+  };
+
+  save();
+  const msg = document.getElementById('saveConfirm');
+  msg.textContent = `✓ Saved! Today's score: ${score}/10`;
+  setTimeout(()=>{ msg.textContent=''; }, 3000);
+}
+
+// Render today
+function renderToday() {
+  document.getElementById('dateDisplay').textContent = fmtDateLong(currentDate);
+  const key = dateKey(currentDate);
+  const d = data[key] || {};
+
+  document.getElementById('weightInput').value = d.weight || '';
+  updateProgress(d.weight);
+
+  const mmap = {bf:'bf',mm:'mm',lunch:'lunch',snack:'snack',dinner:'dinner',ev:'ev'};
+  Object.keys(mmap).forEach(k => {
+    const m = (d.meals||{})[k]||{};
+    const fi = document.getElementById(k+'Food');
+    const ci = document.getElementById(k+'Cal');
+    if(fi) fi.value = m.food||'';
+    if(ci) ci.value = m.cal||'';
+  });
+
+  renderWater(d.water||0);
+  exState = {};
+  Object.keys(EX_MAP).forEach(k => {
+    const el = document.getElementById('tog-'+k);
+    if(!el) return;
+    if((d.exercise||[]).includes(k)) { el.classList.add('on'); exState[k]=EX_MAP[k]; }
+    else el.classList.remove('on');
+  });
+
+  HABITS.forEach(h => {
+    const el = document.getElementById('h-'+h);
+    if(!el) return;
+    if((d.habits||[]).includes(h)) el.classList.add('done');
+    else el.classList.remove('done');
+  });
+
+  document.getElementById('notesInput').value = d.notes||'';
+  recalc();
+}
+
+// Render stats
+function renderStats() {
+  // Quit counter
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.floor((today - QUIT_DATE)/86400000);
+  const qEl = document.getElementById('quitDaysDisplay');
+  if(diff < 0) { qEl.textContent = Math.abs(diff)+'d to go'; qEl.style.fontSize='28px'; }
+  else { qEl.textContent = diff; qEl.style.fontSize='52px'; }
+
+  // Week strip
+  const strip = document.getElementById('weekStrip');
+  strip.innerHTML = '';
+  const dow = (today.getDay()+6)%7;
+  const mon = new Date(today); mon.setDate(today.getDate()-dow);
+  const days=['M','T','W','T','F','S','S'];
+  for(let i=0;i<7;i++){
+    const d = new Date(mon); d.setDate(mon.getDate()+i);
+    const k = dateKey(d);
+    const dd = data[k];
+    const div = document.createElement('div');
+    div.className = 'week-day';
+    if(d.getTime()===today.getTime()) div.classList.add('today');
+    const score = dd?.score;
+    let emoji = '·';
+    if(d <= today && dd) {
+      if(score>=8){div.classList.add('great');emoji='🌟';}
+      else if(score>=6){div.classList.add('good');emoji='✓';}
+      else if(score>=4){div.classList.add('okay');emoji='~';}
+      else{div.classList.add('off');emoji='✗';}
+    }
+    div.innerHTML = `<div class="wd-label">${days[i]}</div><div class="wd-score">${emoji}</div>`;
+    strip.appendChild(div);
+  }
+
+  // Weight with data
+  const weightEntries = Object.keys(data).filter(k=>data[k].weight).sort();
+  const latestW = weightEntries.length ? data[weightEntries[weightEntries.length-1]].weight : null;
+  document.getElementById('statLost').textContent = latestW ? (START_W-latestW).toFixed(1) : '—';
+  document.getElementById('statToGo').textContent = latestW ? (latestW-TARGET_W).toFixed(1) : '—';
+
+  // Streak
+  let streak = 0;
+  const d2 = new Date(today);
+  while(true){
+    const k = dateKey(d2);
+    if(data[k]?.score > 0) { streak++; d2.setDate(d2.getDate()-1); }
+    else break;
+    if(streak>365) break;
+  }
+  document.getElementById('statStreak').textContent = streak;
+
+  // Avg score
+  const scores = Object.values(data).map(d=>d.score).filter(s=>s>0);
+  document.getElementById('statAvgScore').textContent = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : '—';
+
+  // Weight history
+  const whScroll = document.getElementById('whScroll');
+  whScroll.innerHTML = '';
+  if(weightEntries.length === 0) {
+    document.getElementById('whCard').style.display='none';
+  } else {
+    document.getElementById('whCard').style.display='block';
+    weightEntries.slice(-14).forEach((k,i,arr) => {
+      const w = data[k].weight;
+      const prev = i>0 ? data[arr[i-1]].weight : null;
+      const delta = prev ? (w-prev).toFixed(1) : null;
+      const div = document.createElement('div');
+      div.className='wh-item';
+      const dd = new Date(k);
+      div.innerHTML = `
+        <div class="wh-date">${dd.toLocaleDateString('en-SG',{day:'numeric',month:'short'})}</div>
+        <div class="wh-val">${w}kg</div>
+        ${delta ? `<div class="wh-delta ${parseFloat(delta)<0?'down':'up'}">${parseFloat(delta)<0?'▼':'▲'}${Math.abs(delta)}</div>` : ''}
+      `;
+      whScroll.appendChild(div);
+    });
+  }
+}
+
+// Reminders
+function renderReminders() {
+  Object.keys(REMINDERS).forEach(k => {
+    const el = document.getElementById('rem-'+k);
+    if(el) {
+      if(reminderState[k]) el.classList.add('on');
+      else el.classList.remove('on');
+    }
+  });
+
+  const perm = Notification.permission;
+  const banner = document.getElementById('permBanner');
+  const status = document.getElementById('notifStatus');
+
+  if(perm === 'granted') {
+    banner.style.display='none';
+    status.style.display='block';
+    status.textContent='✅ Notifications enabled';
+    scheduleReminders();
+  } else if(perm === 'denied') {
+    banner.style.display='none';
+    status.style.display='block';
+    status.textContent='❌ Notifications blocked — please enable in phone settings';
+    status.style.color='var(--warn)';
+  } else {
+    banner.style.display='block';
+    status.style.display='none';
+  }
+}
+
+function toggleReminder(name) {
+  reminderState[name] = !reminderState[name];
+  const el = document.getElementById('rem-'+name);
+  if(el) {
+    if(reminderState[name]) el.classList.add('on');
+    else el.classList.remove('on');
+  }
+  saveReminders();
+}
+
+async function requestNotificationPermission() {
+  try {
+    const result = await Notification.requestPermission();
+    renderReminders();
+    if(result === 'granted') scheduleReminders();
+  } catch(e) { console.error(e); }
+}
+
+function scheduleReminders() {
+  if(Notification.permission !== 'granted') return;
+  if('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(reg => {
+      Object.keys(REMINDERS).forEach(k => {
+        if(!reminderState[k]) return;
+        const r = REMINDERS[k];
+        const now = new Date();
+        const target = new Date();
+        target.setHours(r.hour, r.min, 0, 0);
+        if(target <= now) target.setDate(target.getDate()+1);
+        const ms = target - now;
+        setTimeout(() => {
+          if(reminderState[k] && Notification.permission==='granted') {
+            reg.active?.postMessage({ type:'SHOW_NOTIFICATION', title:r.title, body:r.body, tag:k });
+            scheduleReminders();
+          }
+        }, ms);
+      });
+    });
+  }
+}
+
+function sendTestNotification() {
+  if(Notification.permission !== 'granted') {
+    requestNotificationPermission().then(() => {
+      if(Notification.permission === 'granted') sendTestNotification();
+    });
+    return;
+  }
+  if('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.active?.postMessage({
+        type:'SHOW_NOTIFICATION',
+        title:'🌿 Neha\'s Tracker',
+        body:'Reminders are working! Stay on track today 💪',
+        tag:'test'
+      });
+    });
+  }
+}
+
+// PWA Install
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+
+document.getElementById('installBtn')?.addEventListener('click', async () => {
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  if(outcome==='accepted') document.getElementById('installBanner').classList.remove('show');
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').classList.remove('show');
+  document.getElementById('iosInstructions').classList.remove('show');
+});
+
+// iOS detection - show instructions instead
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+if(isIOS && !isInStandaloneMode) {
+  document.getElementById('iosInstructions').classList.add('show');
+}
+
+// Weight input listener
+document.getElementById('weightInput').addEventListener('input', function(){
+  updateProgress(parseFloat(this.value));
+});
+
+// Wire food inputs to auto-fill calories
+MEAL_PAIRS.forEach(([foodId, calId]) => {
+  const foodEl = document.getElementById(foodId);
+  if(foodEl) {
+    foodEl.addEventListener('input', () => autoFillCalories(foodId, calId));
+    foodEl.addEventListener('blur', () => autoFillCalories(foodId, calId));
+  }
+  const calEl = document.getElementById(calId);
+  if(calEl) calEl.addEventListener('input', recalc);
+});
+
+// Service worker registration
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    console.log('SW registered');
+    if(Notification.permission==='granted') scheduleReminders();
+  }).catch(e => console.log('SW error', e));
+}
+
+// Init
+load();
+renderToday();
+renderStats();
+</script>
+</body>
+</html>
